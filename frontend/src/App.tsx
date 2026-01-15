@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import { searchBirds, Bird } from "./australianBirds";
-import { LuBird } from "react-icons/lu";
-import { FaTrophy, FaList, FaHome, FaArrowLeft, FaCrown } from "react-icons/fa";
 
 interface User {
   id: string;
@@ -23,7 +21,7 @@ interface UserProfile {
   birdCount: number;
 }
 
-const API_BASE = "http://localhost:3001/api";
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:3001/api";
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -197,9 +195,7 @@ function App() {
     return (
       <div className="App login-screen">
         <div className="login-container">
-          <h1>
-            <LuBird />
-          </h1>
+          <h1>🐦</h1>
           <h1>Wing Watch</h1>
           <p>A bit of counting, a lot of chirping</p>
           <LoginForm onLogin={handleLogin} loading={loading} />
@@ -219,10 +215,10 @@ function App() {
 
         <nav className="bottom-nav">
           <button onClick={backToDashboard} className="nav-btn active">
-            <FaHome /> Dashboard
+            🏠 Dashboard
           </button>
           <button onClick={viewMyList} className="nav-btn">
-            <FaList /> My List
+            📝 My List
           </button>
         </nav>
 
@@ -252,17 +248,17 @@ function App() {
       <div className="App my-list">
         <header className="app-header">
           <h1>
-            <FaList /> My List
+            📝 My List
           </h1>
           <p>{userProfile?.birdCount || 0} birds spotted</p>
         </header>
 
         <nav className="bottom-nav">
           <button onClick={backToDashboard} className="nav-btn">
-            <FaHome /> Dashboard
+            🏠 Dashboard
           </button>
           <button onClick={viewMyList} className="nav-btn active">
-            <FaList /> My List
+            📝 My List
           </button>
         </nav>
 
@@ -279,7 +275,7 @@ function App() {
           />
           {showDuplicatePopup && (
             <div className="duplicate-popup">
-              Nice try, but this bird is already on your list! <LuBird />
+              Nice try, but this bird is already on your list! 🐦
             </div>
           )}
           {userProfile && (
@@ -312,10 +308,10 @@ function App() {
       <div className="App user-list">
         <header className="app-header">
           <button className="back-btn" onClick={backToDashboard}>
-            <FaArrowLeft />
+            ←
           </button>
           <h1>
-            <FaList /> {selectedUser}'s List
+            📝 {selectedUser}'s List
           </h1>
           <p>{userProfile?.birdCount || 0} birds spotted</p>
         </header>
@@ -390,7 +386,7 @@ const Leaderboard: React.FC<{
   return (
     <section className="leaderboard">
       <h2>
-        <FaTrophy /> Leaderboard
+        🏆 Leaderboard
       </h2>
       {leaderboard.length > 0 ? (
         <div className="leaderboard-list">
@@ -401,7 +397,7 @@ const Leaderboard: React.FC<{
               <span className="count">{user.birdCount} birds</span>
               {index === 0 && (
                 <span className="crown">
-                  <FaCrown />
+                  👑
                 </span>
               )}
             </div>

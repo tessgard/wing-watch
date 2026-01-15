@@ -1,25 +1,54 @@
-# 🐦 Birding App
+# 🐦 Wing Watch
 
-A full-stack application for bird watchers to track and log their bird sightings.
+_A bit of counting, a lot of chirping_
+
+A full-stack birding application for bird watchers to track their sightings, compete with friends
+
+## ✨ Features
+
+### 🔐 User Management
+
+- Individual user authentication and login
+- Personal birding profiles and statistics
+- Multi-user support with unique bird lists
+
+### 🐦 Bird Tracking
+
+- **967 Australian bird species** database with scientific names and family classifications
+- **Smart search dropdown** with real-time filtering
+- **Duplicate prevention** - no cheating allowed!
+- Add and delete birds from personal lists
+- Automatic bird counting and statistics
+
+### 🏆 Social Features
+
+- **Leaderboard** with rankings by bird count
+- **Crown for the leader** - competitive birding at its finest
+- Browse other users' bird lists
+- See who's the top birder in your area
+
+### 📱 Mobile-First Design
+
+- Optimized for phone screens and outdoor use
+- Responsive navigation with bottom bar
+- Modern icons using React Icons
+
+### 🎯 User Experience
+
+- Clean, intuitive interface
+- Real-time updates and validation
+- Loading states and error handling
+- Smooth navigation between views
 
 ## Project Structure
 
 ```
-birding-app/
+wing-watch/
 ├── frontend/          # React TypeScript frontend
 ├── backend/           # Node.js Express TypeScript backend
-└── .github/
-    └── copilot-instructions.md
+├── .github/          # Development guidelines
+└── README.md         # This file
 ```
-
-## Features
-
-- 🐦 Bird identification and logging
-- 📍 Location-based sightings
-- 📸 Photo upload capabilities
-- 📚 Species information database
-- 📖 Personal birding journal
-- 📱 Responsive mobile design
 
 ## Development Setup
 
@@ -30,7 +59,13 @@ birding-app/
 
 ### Installation
 
-1. Clone the repository
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/tessgard/wing-watch.git
+   cd wing-watch
+   ```
+
 2. Install frontend dependencies:
 
    ```bash
@@ -46,9 +81,28 @@ birding-app/
 
 ### Running the Application
 
-#### Start both servers concurrently:
+#### Option 1: VS Code Tasks (Recommended)
 
-**Frontend Development Server:**
+Use the built-in VS Code tasks:
+
+- **Start Frontend Dev Server** - React development server
+- **Start Backend Dev Server** - Express API server
+
+Access via `Ctrl+Shift+P` → "Tasks: Run Task"
+
+#### Option 2: Manual Start
+
+**Backend Server:**
+
+```bash
+cd backend
+npm run dev
+```
+
+- Runs on: http://localhost:3001
+- Auto-restarts on file changes
+
+**Frontend Server:**
 
 ```bash
 cd frontend
@@ -58,16 +112,64 @@ npm start
 - Runs on: http://localhost:3000
 - Hot reloading enabled
 
-**Backend Development Server:**
+### First Time Setup
 
-```bash
-cd backend
-npm run dev
-```
+1. Start both servers
+2. Open http://localhost:3000
+3. Create a username to begin birding
+4. Start adding birds to your list!
 
-- Runs on: http://localhost:5000
-- API endpoints: `/api/health`, `/api/birds`
-- Auto-restarts on file changes
+## 🛠 Technology Stack
+
+### Frontend
+
+- **React 18** with TypeScript
+- **React Icons** (Lucide and FontAwesome)
+- **Modern CSS** with mobile-first responsive design
+- **Dark olive green theme** (#556B2F)
+- Create React App for development workflow
+
+### Backend
+
+- **Node.js** with Express framework
+- **TypeScript** for type safety
+- **CORS** enabled for cross-origin requests
+- **In-memory data store** with persistent user sessions
+- RESTful API design
+
+### Data
+
+- **967 Australian bird species** with:
+  - Common names (e.g., "Rainbow Lorikeet")
+  - Scientific names (e.g., "Trichoglossus moluccanus")
+  - Family classifications (e.g., "Psittacidae")
+
+## 🔧 API Endpoints
+
+### Authentication
+
+- `POST /api/login` - User login/registration
+- `GET /api/users` - Get all users
+- `GET /api/users/:username` - Get user profile and bird list
+
+### Bird Management
+
+- `POST /api/users/:username/birds` - Add bird to user's list
+- `DELETE /api/users/:username/birds/:birdId` - Remove bird from list
+
+### Leaderboard
+
+- `GET /api/leaderboard` - Get user rankings by bird count
+
+## 📱 How to Use
+
+1. **Login**: Enter your username to create/access your account
+2. **Dashboard**: View leaderboard and browse other users' lists
+3. **Add Birds**: Search from 967 Australian species and add to your list
+4. **My List**: View your personal bird collection with counts
+5. **Compete**: Check the leaderboard to see who's the top birder!
+
+## 🚀 Development
 
 ### Building for Production
 
@@ -85,56 +187,36 @@ cd backend
 npm run build
 ```
 
-## API Endpoints
+### Code Quality
 
-- `GET /api/health` - Health check
-- `GET /api/birds` - Get all bird sightings
-- `POST /api/birds` - Log new bird sighting
+- TypeScript for type safety
+- ESLint and Prettier for code formatting
+- Semantic commit messages
+- Mobile-first responsive design principles
 
-## Technology Stack
+## 🎯 Future Enhancements
 
-### Frontend
+- Location-based bird sightings with GPS
+- Photo upload for bird documentation
+- Bird call audio recordings
+- Social features (following other birders)
+- Achievements and badges system
+- Export personal bird lists
+- Advanced filtering and search
+- Seasonal migration tracking
 
-- React 18 with TypeScript
-- Create React App
-- Modern CSS with responsive design
-- Functional components with hooks
+## 🤝 Contributing
 
-### Backend
+1. Fork the repository
+2. Create a feature branch
+3. Follow TypeScript and React best practices
+4. Test your changes thoroughly
+5. Submit a pull request
 
-- Node.js with Express
-- TypeScript
-- CORS enabled
-- Environment variables with dotenv
-- Nodemon for development
+## 📄 License
 
-## VS Code Tasks
-
-The project includes VS Code tasks for development:
-
-- **Start Frontend Dev Server** - Launches React development server
-- **Start Backend Dev Server** - Launches Express API server with nodemon
-
-Access tasks via `Ctrl+Shift+P` → "Tasks: Run Task"
-
-## Next Steps
-
-1. Implement bird species database
-2. Add user authentication
-3. Create bird logging form
-4. Implement photo upload functionality
-5. Add location services
-6. Create species identification guide
-7. Build personal journal features
-
-## Contributing
-
-1. Follow TypeScript best practices
-2. Use semantic commit messages
-3. Implement proper error handling
-4. Add comprehensive testing
-5. Follow ESLint and Prettier formatting rules
+This project is open source and available under the MIT License.
 
 ---
 
-**Happy Bird Watching!** 🐦
+**Happy Bird Watching!** 🐦 _Get out there and start counting!_
