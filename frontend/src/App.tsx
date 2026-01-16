@@ -40,6 +40,22 @@ function App() {
   const [showDuplicatePopup, setShowDuplicatePopup] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Check for stored user on app load
+  useEffect(() => {
+    const storedUser = localStorage.getItem('wingwatch-user');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setCurrentUser(user);
+        setView('dashboard');
+        loadDashboardData();
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+        localStorage.removeItem('wingwatch-user');
+      }
+    }
+  }, []);
+
   // Login function
   const handleLogin = async (username: string) => {
     try {
@@ -54,6 +70,8 @@ function App() {
       const data = await response.json();
       if (response.ok) {
         setCurrentUser(data.user);
+        // Store user in localStorage for persistence
+        localStorage.setItem('wingwatch-user', JSON.stringify(data.user));
         setView("dashboard");
         loadDashboardData();
       }
@@ -232,6 +250,7 @@ function App() {
             className="logout-btn"
             onClick={() => {
               setCurrentUser(null);
+              localStorage.removeItem('wingwatch-user');
               setView("login");
             }}
           >
@@ -292,6 +311,7 @@ function App() {
             className="logout-btn"
             onClick={() => {
               setCurrentUser(null);
+              localStorage.removeItem('wingwatch-user');
               setView("login");
             }}
           >
@@ -331,6 +351,7 @@ function App() {
             className="logout-btn"
             onClick={() => {
               setCurrentUser(null);
+              localStorage.removeItem('wingwatch-user');
               setView("login");
             }}
           >
