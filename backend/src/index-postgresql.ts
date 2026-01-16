@@ -17,11 +17,7 @@ const prisma = new PrismaClient({
 
 // CORS configuration
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:3000',
-    'https://frontend-seven-henna-60.vercel.app',
-    'https://frontend-gqbkrbjol-gardtess-projects.vercel.app'
-  ],
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true,
 }));
 

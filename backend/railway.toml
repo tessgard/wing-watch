@@ -1,0 +1,9 @@
+[build]
+builder = "nixpacks"
+
+[build.nixpacksConfig]
+setup = ["nodejs_22"]
+
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/api/health"
