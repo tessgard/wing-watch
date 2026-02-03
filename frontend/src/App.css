@@ -145,23 +145,50 @@ body {
   padding: 1rem;
   text-align: center;
   margin-top: auto;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
 }
 
-.app-footer .logout-btn {
+.app-footer .logout-btn,
+.app-footer .backup-btn {
   position: static;
   transform: none;
-  background: #556b2f;
   color: white;
-  padding: 0.8rem 2rem;
+  padding: 0.8rem 1.5rem;
   border-radius: 8px;
   font-weight: 600;
   transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  flex: 1;
+  max-width: 150px;
+}
+
+.app-footer .logout-btn {
+  background: #d32f2f;
+}
+
+.app-footer .backup-btn {
+  background: #388e3c;
+}
+
+.app-footer .backup-btn:disabled {
+  background: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
 }
 
 .app-footer .logout-btn:hover {
-  background: #556b2f;
+  background: #c62828;
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+.app-footer .backup-btn:hover:not(:disabled) {
+  background: #2e7d32;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(56, 142, 60, 0.3);
 }
 
 /* Bottom Navigation */

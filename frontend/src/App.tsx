@@ -39,6 +39,32 @@ function App() {
   const [showDuplicatePopup, setShowDuplicatePopup] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // CSV Export function for user-specific data
+  const handleDataBackup = (username: string, birdList: BirdItem[]) => {
+    try {
+      // Generate CSV content
+      const csvHeader = 'Bird Name,Date Added\n';
+      const csvRows = birdList.map(bird => 
+        `"${bird.name}","${new Date(bird.dateAdded).toLocaleDateString()}"`
+      ).join('\n');
+      
+      const csvContent = csvHeader + csvRows;
+      
+      // Create and download the file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${username}-birds-${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading backup:', error);
+    }
+  };
+
   // Check for stored user on app load
   useEffect(() => {
     const storedUser = localStorage.getItem("wingwatch-user");
@@ -297,6 +323,13 @@ function App() {
 
         <footer className="app-footer">
           <button
+            className="backup-btn"
+            onClick={() => userProfile && handleDataBackup(userProfile.username, userProfile.birdList)}
+            disabled={!userProfile || userProfile.birdList.length === 0}
+          >
+            Data Backup
+          </button>
+          <button
             className="logout-btn"
             onClick={() => {
               setCurrentUser(null);
@@ -334,6 +367,13 @@ function App() {
         </main>
 
         <footer className="app-footer">
+          <button
+            className="backup-btn"
+            onClick={() => userProfile && handleDataBackup(userProfile.username, userProfile.birdList)}
+            disabled={!userProfile || userProfile.birdList.length === 0}
+          >
+            Data Backup
+          </button>
           <button
             className="logout-btn"
             onClick={() => {
