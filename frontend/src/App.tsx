@@ -42,16 +42,16 @@ function App() {
 
   // Check for stored user on app load
   useEffect(() => {
-    const storedUser = localStorage.getItem('wingwatch-user');
+    const storedUser = localStorage.getItem("wingwatch-user");
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
         setCurrentUser(user);
-        setView('dashboard');
+        setView("dashboard");
         loadDashboardData();
       } catch (error) {
-        console.error('Error parsing stored user:', error);
-        localStorage.removeItem('wingwatch-user');
+        console.error("Error parsing stored user:", error);
+        localStorage.removeItem("wingwatch-user");
       }
     }
   }, []);
@@ -71,7 +71,7 @@ function App() {
       if (response.ok) {
         setCurrentUser(data.user);
         // Store user in localStorage for persistence
-        localStorage.setItem('wingwatch-user', JSON.stringify(data.user));
+        localStorage.setItem("wingwatch-user", JSON.stringify(data.user));
         setView("dashboard");
         loadDashboardData();
       }
@@ -141,7 +141,7 @@ function App() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ birdName }),
-        }
+        },
       );
 
       console.log("Response status:", response.status);
@@ -177,7 +177,7 @@ function App() {
         `${API_BASE}/users/${currentUser.username}/birds/${birdId}`,
         {
           method: "DELETE",
-        }
+        },
       );
 
       if (response.ok) {
@@ -241,7 +241,7 @@ function App() {
         </nav>
 
         <main className="dashboard-content">
-          <Leaderboard leaderboard={leaderboard} />
+          <Leaderboard leaderboard={leaderboard} onViewUser={viewUserList} />
           <UsersList users={users} onViewUser={viewUserList} />
         </main>
 
@@ -250,7 +250,7 @@ function App() {
             className="logout-btn"
             onClick={() => {
               setCurrentUser(null);
-              localStorage.removeItem('wingwatch-user');
+              localStorage.removeItem("wingwatch-user");
               setView("login");
             }}
           >
@@ -266,9 +266,7 @@ function App() {
     return (
       <div className="App my-list">
         <header className="app-header">
-          <h1>
-            📝 My List
-          </h1>
+          <h1>📝 My List</h1>
           <p>{userProfile?.birdCount || 0} birds spotted</p>
         </header>
 
@@ -311,7 +309,7 @@ function App() {
             className="logout-btn"
             onClick={() => {
               setCurrentUser(null);
-              localStorage.removeItem('wingwatch-user');
+              localStorage.removeItem("wingwatch-user");
               setView("login");
             }}
           >
@@ -330,9 +328,7 @@ function App() {
           <button className="back-btn" onClick={backToDashboard}>
             ←
           </button>
-          <h1>
-            📝 {selectedUser}'s List
-          </h1>
+          <h1>📝 {selectedUser}'s List</h1>
           <p>{userProfile?.birdCount || 0} birds spotted</p>
         </header>
 
@@ -351,7 +347,7 @@ function App() {
             className="logout-btn"
             onClick={() => {
               setCurrentUser(null);
-              localStorage.removeItem('wingwatch-user');
+              localStorage.removeItem("wingwatch-user");
               setView("login");
             }}
           >
@@ -403,25 +399,24 @@ const LoginForm: React.FC<{
 // Leaderboard Component
 const Leaderboard: React.FC<{
   leaderboard: { username: string; birdCount: number }[];
-}> = ({ leaderboard }) => {
+  onViewUser: (username: string) => void;
+}> = ({ leaderboard, onViewUser }) => {
   return (
     <section className="leaderboard">
-      <h2>
-        🏆 Leaderboard
-      </h2>
+      <h2>🏆 Leaderboard</h2>
       {leaderboard.length > 0 ? (
         <div className="leaderboard-list">
           {leaderboard.map((user, index) => (
-            <div key={user.username} className="leaderboard-item">
+            <button
+              key={user.username}
+              onClick={() => onViewUser(user.username)}
+              className="leaderboard-item"
+            >
               <span className="rank">#{index + 1}</span>
               <span className="username">{user.username}</span>
               <span className="count">{user.birdCount} birds</span>
-              {index === 0 && (
-                <span className="crown">
-                  👑
-                </span>
-              )}
-            </div>
+              {index === 0 && <span className="crown">👑</span>}
+            </button>
           ))}
         </div>
       ) : (
