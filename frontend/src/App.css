@@ -272,6 +272,16 @@ body {
   background: #f9f9f9;
   border-radius: 8px;
   position: relative;
+  text-align: left;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.leaderboard-item:hover {
+  background: #eeeeee;
 }
 
 .rank {
@@ -282,8 +292,9 @@ body {
 
 .username {
   flex: 1;
-  font-weight: 600;
+  font-weight: 400;
   margin-left: 1rem;
+  color: #000;
 }
 
 .count {

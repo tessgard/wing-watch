@@ -573,9 +573,9 @@ const BirdList: React.FC<{
   return (
     <div className="bird-list">
       {birds.length > 0 ? (
-        birds.map((bird, index) => (
+        birds.slice().reverse().map((bird, index) => (
           <div key={bird.id} className="bird-item">
-            <span className="bird-number">#{index + 1}</span>
+            <span className="bird-number">#{birds.length - index}</span>
             <span className="bird-name">{bird.name}</span>
             {canEdit && (
               <button
