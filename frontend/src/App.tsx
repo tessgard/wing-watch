@@ -28,7 +28,6 @@ function App() {
   const [view, setView] = useState<
     "login" | "dashboard" | "myList" | "userList"
   >("login");
-  const [users, setUsers] = useState<User[]>([]);
   const [leaderboard, setLeaderboard] = useState<
     { username: string; birdCount: number }[]
   >([]);
@@ -85,15 +84,8 @@ function App() {
   // Load dashboard data
   const loadDashboardData = async () => {
     try {
-      const [usersRes, leaderboardRes] = await Promise.all([
-        fetch(`${API_BASE}/users`),
-        fetch(`${API_BASE}/leaderboard`),
-      ]);
-
-      const usersData = await usersRes.json();
+      const leaderboardRes = await fetch(`${API_BASE}/leaderboard`);
       const leaderboardData = await leaderboardRes.json();
-
-      setUsers(usersData.users);
       setLeaderboard(leaderboardData.leaderboard);
     } catch (error) {
       console.error("Error loading dashboard:", error);
@@ -416,7 +408,9 @@ const Leaderboard: React.FC<{
               className="leaderboard-item"
             >
               <span className="rank">#{index + 1}</span>
-              <span className="username">{truncateUsername(user.username)}</span>
+              <span className="username">
+                {truncateUsername(user.username)}
+              </span>
               <span className="count">{user.birdCount} birds</span>
               {index === 0 && <span className="crown">👑</span>}
             </button>
@@ -549,20 +543,23 @@ const BirdList: React.FC<{
   return (
     <div className="bird-list">
       {birds.length > 0 ? (
-        birds.slice().reverse().map((bird, index) => (
-          <div key={bird.id} className="bird-item">
-            <span className="bird-number">#{birds.length - index}</span>
-            <span className="bird-name">{bird.name}</span>
-            {canEdit && (
-              <button
-                onClick={() => onDeleteBird(bird.id)}
-                className="delete-btn"
-              >
-                ×
-              </button>
-            )}
-          </div>
-        ))
+        birds
+          .slice()
+          .reverse()
+          .map((bird, index) => (
+            <div key={bird.id} className="bird-item">
+              <span className="bird-number">#{birds.length - index}</span>
+              <span className="bird-name">{bird.name}</span>
+              {canEdit && (
+                <button
+                  onClick={() => onDeleteBird(bird.id)}
+                  className="delete-btn"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          ))
       ) : (
         <p className="empty-message">No birds spotted yet!</p>
       )}
