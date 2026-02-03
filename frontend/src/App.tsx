@@ -242,7 +242,6 @@ function App() {
 
         <main className="dashboard-content">
           <Leaderboard leaderboard={leaderboard} onViewUser={viewUserList} />
-          <UsersList users={users} onViewUser={viewUserList} />
         </main>
 
         <footer className="app-footer">
@@ -401,6 +400,10 @@ const Leaderboard: React.FC<{
   leaderboard: { username: string; birdCount: number }[];
   onViewUser: (username: string) => void;
 }> = ({ leaderboard, onViewUser }) => {
+  const truncateUsername = (username: string) => {
+    return username.length > 14 ? username.substring(0, 14) + "..." : username;
+  };
+
   return (
     <section className="leaderboard">
       <h2>🏆 Leaderboard</h2>
@@ -413,7 +416,7 @@ const Leaderboard: React.FC<{
               className="leaderboard-item"
             >
               <span className="rank">#{index + 1}</span>
-              <span className="username">{user.username}</span>
+              <span className="username">{truncateUsername(user.username)}</span>
               <span className="count">{user.birdCount} birds</span>
               {index === 0 && <span className="crown">👑</span>}
             </button>
@@ -427,33 +430,6 @@ const Leaderboard: React.FC<{
 };
 
 // Users List Component
-const UsersList: React.FC<{
-  users: User[];
-  onViewUser: (username: string) => void;
-}> = ({ users, onViewUser }) => {
-  return (
-    <section className="users-list">
-      <h2>All Birders</h2>
-      {users.length > 0 ? (
-        <div className="users-grid">
-          {users.map((user) => (
-            <button
-              key={user.id}
-              onClick={() => onViewUser(user.username)}
-              className="user-card"
-            >
-              <div className="user-name">{user.username}</div>
-              <div className="user-count">{user.birdCount} birds</div>
-            </button>
-          ))}
-        </div>
-      ) : (
-        <p className="empty-message">No users found</p>
-      )}
-    </section>
-  );
-};
-
 // Add Bird Form Component
 const AddBirdForm: React.FC<{
   selectedBird: Bird | null;
