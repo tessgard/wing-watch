@@ -3,17 +3,27 @@ import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 import 'dotenv/config';
 
+// Types
+interface Bird {
+  id: string;
+  name: string;
+  dateAdded: Date;
+  userId: string;
+}
+
+interface User {
+  id: string;
+  username: string;
+  createdAt: Date;
+  updatedAt: Date;
+  birds: Bird[];
+}
+
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Initialize Prisma Client with connection URL from environment
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL
-    }
-  }
-});
+// Initialize Prisma Client
+const prisma = new PrismaClient();
 
 // CORS configuration
 app.use(cors({
@@ -74,7 +84,7 @@ app.get('/api/users', async (req, res) => {
       include: { birds: true }
     });
 
-    const usersWithCounts = users.map(user => ({
+    const usersWithCounts = users.map((user: User) => ({
       id: user.id,
       username: user.username,
       birdCount: user.birds.length
@@ -95,11 +105,11 @@ app.get('/api/leaderboard', async (req, res) => {
     });
 
     const leaderboard = users
-      .map(user => ({
+      .map((user: User) => ({
         username: user.username,
         birdCount: user.birds.length
       }))
-      .sort((a, b) => b.birdCount - a.birdCount)
+      .sort((a: { username: string; birdCount: number }, b: { username: string; birdCount: number }) => b.birdCount - a.birdCount)
       .slice(0, 10);
 
     res.json({ leaderboard });
@@ -123,7 +133,7 @@ app.get('/api/users/:username', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const birdList = user.birds.map(bird => ({
+    const birdList = user.birds.map((bird: Bird) => ({
       id: bird.id,
       name: bird.name,
       dateAdded: bird.dateAdded.toISOString()
@@ -161,7 +171,7 @@ app.post('/api/users/:username/birds', async (req, res) => {
     }
 
     // Check if bird already exists
-    const existingBird = user.birds.find(bird => bird.name === birdName);
+    const existingBird = user.birds.find((bird: Bird) => bird.name === birdName);
     if (existingBird) {
       return res.status(409).json({ error: 'Bird already in list' });
     }
