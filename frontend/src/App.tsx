@@ -54,7 +54,7 @@ function App() {
   const handleInfoClick = (bird: BirdItem) => {
     const url = getBirdUrl(bird.name);
     if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(url, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -271,7 +271,7 @@ function App() {
       <div className="App dashboard">
         <header className="app-header">
           <h1>Dashboard</h1>
-          <p>Welcome to Staging Application, {currentUser?.username}!</p>
+          <p>Welcome, {currentUser?.username}!</p>
         </header>
 
         <nav className="bottom-nav">
