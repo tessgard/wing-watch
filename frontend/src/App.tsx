@@ -47,7 +47,7 @@ function App() {
     const birdUrl = australianBirdUrls.find(
       (bird) => bird.commonName === commonName,
     );
-    return birdUrl ? birdUrl.url : null;
+    return (birdUrl && birdUrl.url.trim() !== "") ? birdUrl.url : null;
   };
 
   // Handle info icon click
