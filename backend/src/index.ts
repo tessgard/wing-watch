@@ -31,7 +31,7 @@ app.use(cors({
     process.env.FRONTEND_URL || 'http://localhost:3000',
     'https://frontend-seven-henna-60.vercel.app',
     'https://frontend-gqbkrbjol-gardtess-projects.vercel.app',
-    'https://wing-watch-staging.vercel.app'
+    'https://wing-watch-staging-git-staging-gardtess-projects.vercel.app'
   ],
   credentials: true,
 }));
