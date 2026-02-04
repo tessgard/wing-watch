@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import { searchBirds, Bird } from "./australianBirds";
+import { australianBirdUrls } from "./australianBirdsUrls";
 
 interface User {
   id: string;
@@ -37,7 +38,53 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [showDuplicatePopup, setShowDuplicatePopup] = useState(false);
+  const [showHtmlModal, setShowHtmlModal] = useState(false);
+  const [selectedBirdUrl, setSelectedBirdUrl] = useState<string>("");
+  const [modalBirdName, setModalBirdName] = useState<string>("");
   const [loading, setLoading] = useState(false);
+
+  // Bird-to-URL matching function
+  const getBirdUrl = (birdName: string): string | null => {
+    // Extract common name from "Common Name (Scientific Name)" format
+    const commonName = birdName.split(' (')[0].trim();
+    const birdUrl = australianBirdUrls.find(bird => bird.commonName === commonName);
+    return birdUrl ? birdUrl.url : null;
+  };
+
+  // Handle info icon click
+  const handleInfoClick = (bird: BirdItem) => {
+    const url = getBirdUrl(bird.name);
+    if (url) {
+      setSelectedBirdUrl(url);
+      setModalBirdName(bird.name.split(' (')[0]);
+      setShowHtmlModal(true);
+    }
+  };
+
+  // Close modal handlers
+  const closeHtmlModal = () => {
+    setShowHtmlModal(false);
+    setSelectedBirdUrl("");
+    setModalBirdName("");
+  };
+
+  // Handle modal backdrop click
+  const handleModalBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      closeHtmlModal();
+    }
+  };
+
+  // Handle escape key
+  useEffect(() => {
+    const handleEscKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showHtmlModal) {
+        closeHtmlModal();
+      }
+    };
+    document.addEventListener('keydown', handleEscKey);
+    return () => document.removeEventListener('keydown', handleEscKey);
+  }, [showHtmlModal]);
 
   // CSV Export function for user-specific data
   const handleDataBackup = (username: string, birdList: BirdItem[]) => {
@@ -317,6 +364,8 @@ function App() {
               birds={userProfile.birdList}
               onDeleteBird={deleteBird}
               canEdit={true}
+              onInfoClick={handleInfoClick}
+              getBirdUrl={getBirdUrl}
             />
           )}
         </main>
@@ -340,6 +389,28 @@ function App() {
             Logout
           </button>
         </footer>
+
+        {/* HTML Content Modal */}
+        {showHtmlModal && (
+          <div className="modal-backdrop" onClick={handleModalBackdropClick}>
+            <div className="html-content-modal">
+              <div className="html-content-header">
+                <h3>{modalBirdName}</h3>
+                <button onClick={closeHtmlModal} className="modal-close-btn">
+                  ×
+                </button>
+              </div>
+              <div className="html-content-body">
+                <iframe
+                  src={selectedBirdUrl}
+                  className="html-content-iframe"
+                  title={`${modalBirdName} information`}
+                  frameBorder="0"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -362,6 +433,8 @@ function App() {
               birds={userProfile.birdList}
               onDeleteBird={() => {}}
               canEdit={false}
+              onInfoClick={handleInfoClick}
+              getBirdUrl={getBirdUrl}
             />
           )}
         </main>
@@ -385,6 +458,28 @@ function App() {
             Logout
           </button>
         </footer>
+
+        {/* HTML Content Modal */}
+        {showHtmlModal && (
+          <div className="modal-backdrop" onClick={handleModalBackdropClick}>
+            <div className="html-content-modal">
+              <div className="html-content-header">
+                <h3>{modalBirdName}</h3>
+                <button onClick={closeHtmlModal} className="modal-close-btn">
+                  ×
+                </button>
+              </div>
+              <div className="html-content-body">
+                <iframe
+                  src={selectedBirdUrl}
+                  className="html-content-iframe"
+                  title={`${modalBirdName} information`}
+                  frameBorder="0"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -579,27 +674,43 @@ const BirdList: React.FC<{
   birds: BirdItem[];
   onDeleteBird: (birdId: string) => void;
   canEdit: boolean;
-}> = ({ birds, onDeleteBird, canEdit }) => {
+  onInfoClick: (bird: BirdItem) => void;
+  getBirdUrl: (birdName: string) => string | null;
+}> = ({ birds, onDeleteBird, canEdit, onInfoClick, getBirdUrl }) => {
   return (
     <div className="bird-list">
       {birds.length > 0 ? (
         birds
           .slice()
           .reverse()
-          .map((bird, index) => (
-            <div key={bird.id} className="bird-item">
-              <span className="bird-number">#{birds.length - index}</span>
-              <span className="bird-name">{bird.name}</span>
-              {canEdit && (
-                <button
-                  onClick={() => onDeleteBird(bird.id)}
-                  className="delete-btn"
-                >
-                  ×
-                </button>
-              )}
-            </div>
-          ))
+          .map((bird, index) => {
+            const hasUrl = getBirdUrl(bird.name) !== null;
+            return (
+              <div key={bird.id} className="bird-item">
+                <span className="bird-number">#{birds.length - index}</span>
+                <span className="bird-name">{bird.name}</span>
+                <div className="bird-actions">
+                  {hasUrl && (
+                    <button
+                      onClick={() => onInfoClick(bird)}
+                      className="info-btn"
+                      title="View bird information"
+                    >
+                      ℹ️
+                    </button>
+                  )}
+                  {canEdit && (
+                    <button
+                      onClick={() => onDeleteBird(bird.id)}
+                      className="delete-btn"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })
       ) : (
         <p className="empty-message">No birds spotted yet!</p>
       )}
