@@ -558,6 +558,30 @@ body {
   color: #333;
 }
 
+.bird-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-btn {
+  background: none;
+  border: none;
+  color: #4caf50;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-btn:hover {
+  background: #e8f5e8;
+}
+
 .delete-btn {
   background: none;
   border: none;
@@ -571,6 +595,97 @@ body {
 
 .delete-btn:hover {
   background: #ffebee;
+}
+
+/* HTML Content Modal */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+}
+
+.html-content-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 420px;
+  max-height: 80vh;
+  width: 90vw;
+  animation: popupSlide 0.3s ease-out;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.html-content-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f0f8e8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.html-content-header h3 {
+  color: #556b2f;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: #556b2f;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+  line-height: 1;
+}
+
+.modal-close-btn:hover {
+  background: rgba(85, 107, 47, 0.1);
+}
+
+.html-content-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.html-content-iframe {
+  width: 100%;
+  flex: 1;
+  border: none;
+  min-height: 400px;
+}
+
+@media (max-width: 480px) {
+  .html-content-modal {
+    width: 95vw;
+    max-width: none;
+    max-height: 85vh;
+  }
+  
+  .modal-backdrop {
+    padding: 0.5rem;
+  }
+  
+  .html-content-iframe {
+    min-height: 350px;
+  }
 }
 
 /* Empty State */
