@@ -46,8 +46,10 @@ function App() {
   // Bird-to-URL matching function
   const getBirdUrl = (birdName: string): string | null => {
     // Extract common name from "Common Name (Scientific Name)" format
-    const commonName = birdName.split(' (')[0].trim();
-    const birdUrl = australianBirdUrls.find(bird => bird.commonName === commonName);
+    const commonName = birdName.split(" (")[0].trim();
+    const birdUrl = australianBirdUrls.find(
+      (bird) => bird.commonName === commonName,
+    );
     return birdUrl ? birdUrl.url : null;
   };
 
@@ -56,7 +58,7 @@ function App() {
     const url = getBirdUrl(bird.name);
     if (url) {
       setSelectedBirdUrl(url);
-      setModalBirdName(bird.name.split(' (')[0]);
+      setModalBirdName(bird.name.split(" (")[0]);
       setShowHtmlModal(true);
     }
   };
@@ -78,37 +80,43 @@ function App() {
   // Handle escape key
   useEffect(() => {
     const handleEscKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && showHtmlModal) {
+      if (e.key === "Escape" && showHtmlModal) {
         closeHtmlModal();
       }
     };
-    document.addEventListener('keydown', handleEscKey);
-    return () => document.removeEventListener('keydown', handleEscKey);
+    document.addEventListener("keydown", handleEscKey);
+    return () => document.removeEventListener("keydown", handleEscKey);
   }, [showHtmlModal]);
 
   // CSV Export function for user-specific data
   const handleDataBackup = (username: string, birdList: BirdItem[]) => {
     try {
       // Generate CSV content
-      const csvHeader = 'Bird Name,Date Added\n';
-      const csvRows = birdList.map(bird => 
-        `"${bird.name}","${new Date(bird.dateAdded).toLocaleDateString()}"`
-      ).join('\n');
-      
+      const csvHeader = "Bird Name,Date Added\n";
+      const csvRows = birdList
+        .map(
+          (bird) =>
+            `"${bird.name}","${new Date(bird.dateAdded).toLocaleDateString()}"`,
+        )
+        .join("\n");
+
       const csvContent = csvHeader + csvRows;
-      
+
       // Create and download the file
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', `${username}-birds-${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute(
+        "download",
+        `${username}-birds-${new Date().toISOString().split("T")[0]}.csv`,
+      );
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading backup:', error);
+      console.error("Error downloading backup:", error);
     }
   };
 
@@ -293,7 +301,7 @@ function App() {
       <div className="App dashboard">
         <header className="app-header">
           <h1>Dashboard</h1>
-          <p>Welcome, {currentUser?.username}!</p>
+          <p>Welcome to Staging Application, {currentUser?.username}!</p>
         </header>
 
         <nav className="bottom-nav">
@@ -373,7 +381,10 @@ function App() {
         <footer className="app-footer">
           <button
             className="backup-btn"
-            onClick={() => userProfile && handleDataBackup(userProfile.username, userProfile.birdList)}
+            onClick={() =>
+              userProfile &&
+              handleDataBackup(userProfile.username, userProfile.birdList)
+            }
             disabled={!userProfile || userProfile.birdList.length === 0}
           >
             Data Backup
@@ -442,7 +453,10 @@ function App() {
         <footer className="app-footer">
           <button
             className="backup-btn"
-            onClick={() => userProfile && handleDataBackup(userProfile.username, userProfile.birdList)}
+            onClick={() =>
+              userProfile &&
+              handleDataBackup(userProfile.username, userProfile.birdList)
+            }
             disabled={!userProfile || userProfile.birdList.length === 0}
           >
             Data Backup
