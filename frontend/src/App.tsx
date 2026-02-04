@@ -38,9 +38,6 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [showDuplicatePopup, setShowDuplicatePopup] = useState(false);
-  const [showHtmlModal, setShowHtmlModal] = useState(false);
-  const [selectedBirdUrl, setSelectedBirdUrl] = useState<string>("");
-  const [modalBirdName, setModalBirdName] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
   // Bird-to-URL matching function
@@ -57,36 +54,9 @@ function App() {
   const handleInfoClick = (bird: BirdItem) => {
     const url = getBirdUrl(bird.name);
     if (url) {
-      setSelectedBirdUrl(url);
-      setModalBirdName(bird.name.split(" (")[0]);
-      setShowHtmlModal(true);
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
-
-  // Close modal handlers
-  const closeHtmlModal = () => {
-    setShowHtmlModal(false);
-    setSelectedBirdUrl("");
-    setModalBirdName("");
-  };
-
-  // Handle modal backdrop click
-  const handleModalBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      closeHtmlModal();
-    }
-  };
-
-  // Handle escape key
-  useEffect(() => {
-    const handleEscKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && showHtmlModal) {
-        closeHtmlModal();
-      }
-    };
-    document.addEventListener("keydown", handleEscKey);
-    return () => document.removeEventListener("keydown", handleEscKey);
-  }, [showHtmlModal]);
 
   // CSV Export function for user-specific data
   const handleDataBackup = (username: string, birdList: BirdItem[]) => {
@@ -400,28 +370,6 @@ function App() {
             Logout
           </button>
         </footer>
-
-        {/* HTML Content Modal */}
-        {showHtmlModal && (
-          <div className="modal-backdrop" onClick={handleModalBackdropClick}>
-            <div className="html-content-modal">
-              <div className="html-content-header">
-                <h3>{modalBirdName}</h3>
-                <button onClick={closeHtmlModal} className="modal-close-btn">
-                  ×
-                </button>
-              </div>
-              <div className="html-content-body">
-                <iframe
-                  src={selectedBirdUrl}
-                  className="html-content-iframe"
-                  title={`${modalBirdName} information`}
-                  frameBorder="0"
-                />
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
@@ -472,28 +420,6 @@ function App() {
             Logout
           </button>
         </footer>
-
-        {/* HTML Content Modal */}
-        {showHtmlModal && (
-          <div className="modal-backdrop" onClick={handleModalBackdropClick}>
-            <div className="html-content-modal">
-              <div className="html-content-header">
-                <h3>{modalBirdName}</h3>
-                <button onClick={closeHtmlModal} className="modal-close-btn">
-                  ×
-                </button>
-              </div>
-              <div className="html-content-body">
-                <iframe
-                  src={selectedBirdUrl}
-                  className="html-content-iframe"
-                  title={`${modalBirdName} information`}
-                  frameBorder="0"
-                />
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
