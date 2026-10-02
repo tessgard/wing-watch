@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
-import { searchBirds, Bird } from "./australianBirds";
+import { Bird } from "./australianBirds";
 import { australianBirdUrls } from "./australianBirdsUrls";
+import {
+  Competition,
+  competitionLabels,
+  loadCompetitionPreference,
+  saveCompetitionPreference,
+  searchCompetitionBirds,
+} from "./competition";
 
 interface User {
   id: string;
@@ -23,6 +30,17 @@ interface UserProfile {
 }
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:3001/api";
+const competitionIcons: Record<Competition, string> = {
+  australia: "🇦🇺",
+  worldwide: "🌐",
+};
+const birdUrlsByCommonName = new Map<string, string>();
+
+australianBirdUrls.forEach(({ commonName, url }) => {
+  if (!birdUrlsByCommonName.has(commonName)) {
+    birdUrlsByCommonName.set(commonName, url);
+  }
+});
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -39,15 +57,20 @@ function App() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showDuplicatePopup, setShowDuplicatePopup] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [competition, setCompetition] = useState<Competition | null>(null);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  const [leaderboardError, setLeaderboardError] = useState(false);
+  const [profileError, setProfileError] = useState(false);
+  const dashboardRequestId = useRef(0);
+  const profileRequestId = useRef(0);
+  const activeCompetitionRef = useRef<Competition | null>(null);
 
   // Bird-to-URL matching function
   const getBirdUrl = (birdName: string): string | null => {
     // Extract common name from "Common Name (Scientific Name)" format
     const commonName = birdName.split(" (")[0].trim();
-    const birdUrl = australianBirdUrls.find(
-      (bird) => bird.commonName === commonName,
-    );
-    return (birdUrl && birdUrl.url.trim() !== "") ? birdUrl.url : null;
+    const birdUrl = birdUrlsByCommonName.get(commonName);
+    return birdUrl && birdUrl.trim() !== "" ? birdUrl : null;
   };
 
   // Handle info icon click
@@ -59,7 +82,7 @@ function App() {
   };
 
   // CSV Export function for user-specific data
-  const handleDataBackup = (username: string, birdList: BirdItem[]) => {
+  const downloadDataBackup = (username: string, birdList: BirdItem[]) => {
     try {
       // Generate CSV content
       const csvHeader = "Bird Name,Date Added\n";
@@ -90,15 +113,31 @@ function App() {
     }
   };
 
+  const handleDataBackup = async (username: string) => {
+    try {
+      const response = await fetch(
+        `${API_BASE}/users/${encodeURIComponent(username)}?competition=worldwide`,
+      );
+      const profile = await response.json();
+      if (!response.ok) throw new Error("Backup request failed");
+      downloadDataBackup(profile.username, profile.birdList);
+    } catch (error) {
+      console.error("Error downloading backup:", error);
+    }
+  };
+
   // Check for stored user on app load
   useEffect(() => {
     const storedUser = localStorage.getItem("wingwatch-user");
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
+        const restoredCompetition = loadCompetitionPreference(user.username);
+        activeCompetitionRef.current = restoredCompetition;
         setCurrentUser(user);
+        setCompetition(restoredCompetition);
         setView("dashboard");
-        loadDashboardData();
+        loadDashboardData(restoredCompetition);
       } catch (error) {
         console.error("Error parsing stored user:", error);
         localStorage.removeItem("wingwatch-user");
@@ -119,11 +158,16 @@ function App() {
       });
       const data = await response.json();
       if (response.ok) {
+        const restoredCompetition = loadCompetitionPreference(
+          data.user.username,
+        );
+        activeCompetitionRef.current = restoredCompetition;
         setCurrentUser(data.user);
+        setCompetition(restoredCompetition);
         // Store user in localStorage for persistence
         localStorage.setItem("wingwatch-user", JSON.stringify(data.user));
         setView("dashboard");
-        loadDashboardData();
+        loadDashboardData(restoredCompetition);
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -133,35 +177,80 @@ function App() {
   };
 
   // Load dashboard data
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (scope: Competition) => {
+    const requestId = ++dashboardRequestId.current;
+    setLeaderboard([]);
+    setLeaderboardError(false);
+    setLeaderboardLoading(true);
     try {
-      const leaderboardRes = await fetch(`${API_BASE}/leaderboard`);
+      const leaderboardRes = await fetch(
+        `${API_BASE}/leaderboard?competition=${scope}`,
+      );
       const leaderboardData = await leaderboardRes.json();
-      setLeaderboard(leaderboardData.leaderboard);
+      if (!leaderboardRes.ok) throw new Error("Leaderboard request failed");
+      if (requestId === dashboardRequestId.current) {
+        setLeaderboard(leaderboardData.leaderboard);
+      }
     } catch (error) {
       console.error("Error loading dashboard:", error);
+      if (requestId === dashboardRequestId.current) {
+        setLeaderboard([]);
+        setLeaderboardError(true);
+      }
+    } finally {
+      if (requestId === dashboardRequestId.current) {
+        setLeaderboardLoading(false);
+      }
     }
   };
 
   // Load user profile
-  const loadUserProfile = async (username: string) => {
+  const loadUserProfile = async (username: string, scope: Competition) => {
+    const requestId = ++profileRequestId.current;
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE}/users/${username}`);
+      setProfileError(false);
+      setUserProfile(null);
+      const response = await fetch(
+        `${API_BASE}/users/${encodeURIComponent(username)}?competition=${scope}`,
+      );
       const data = await response.json();
-      if (response.ok) {
+      if (response.ok && requestId === profileRequestId.current) {
         setUserProfile(data);
+      } else if (!response.ok) {
+        throw new Error("Profile request failed");
       }
     } catch (error) {
       console.error("Error loading user profile:", error);
+      if (requestId === profileRequestId.current) setProfileError(true);
     } finally {
-      setLoading(false);
+      if (requestId === profileRequestId.current) setLoading(false);
     }
+  };
+
+  const selectCompetition = (nextCompetition: Competition) => {
+    if (!currentUser || nextCompetition === competition) return;
+    saveCompetitionPreference(currentUser.username, nextCompetition);
+    activeCompetitionRef.current = nextCompetition;
+    setCompetition(nextCompetition);
+    setSelectedBird(null);
+    setSearchQuery("");
+    setShowDropdown(false);
+    setUserProfile(null);
+    loadDashboardData(nextCompetition);
+  };
+
+  const handleLogout = () => {
+    activeCompetitionRef.current = null;
+    setCurrentUser(null);
+    setCompetition(null);
+    localStorage.removeItem("wingwatch-user");
+    setView("login");
   };
 
   // Add bird
   const addBird = async () => {
-    if (!selectedBird || !currentUser || !userProfile) return;
+    if (!selectedBird || !currentUser || !userProfile || !competition) return;
 
     const birdName = `${selectedBird.commonName} (${selectedBird.scientificName})`;
 
@@ -195,8 +284,11 @@ function App() {
         setSelectedBird(null);
         setSearchQuery("");
         setShowDropdown(false);
-        loadUserProfile(currentUser.username);
-        loadDashboardData();
+        const activeCompetition = activeCompetitionRef.current;
+        if (activeCompetition) {
+          loadUserProfile(currentUser.username, "worldwide");
+          loadDashboardData(activeCompetition);
+        }
       } else {
         console.error("Failed to add bird:", responseData);
         alert(`Failed to add bird: ${responseData.error || "Unknown error"}`);
@@ -213,7 +305,7 @@ function App() {
 
   // Delete bird
   const deleteBird = async (birdId: string) => {
-    if (!currentUser) return;
+    if (!currentUser || !competition) return;
 
     try {
       const response = await fetch(
@@ -224,8 +316,11 @@ function App() {
       );
 
       if (response.ok) {
-        loadUserProfile(currentUser.username);
-        loadDashboardData();
+        const activeCompetition = activeCompetitionRef.current;
+        if (activeCompetition) {
+          loadUserProfile(currentUser.username, "worldwide");
+          loadDashboardData(activeCompetition);
+        }
       }
     } catch (error) {
       console.error("Error deleting bird:", error);
@@ -234,21 +329,24 @@ function App() {
 
   // Navigation handlers
   const viewMyList = () => {
+    if (!competition) return;
     setView("myList");
     if (currentUser) {
-      loadUserProfile(currentUser.username);
+      loadUserProfile(currentUser.username, "worldwide");
     }
   };
 
   const viewUserList = (username: string) => {
+    if (!competition) return;
     setSelectedUser(username);
     setView("userList");
-    loadUserProfile(username);
+    loadUserProfile(username, competition);
   };
 
   const backToDashboard = () => {
+    if (!competition) return;
     setView("dashboard");
-    loadDashboardData();
+    loadDashboardData(competition);
   };
 
   // Login Screen
@@ -264,6 +362,8 @@ function App() {
       </div>
     );
   }
+
+  if (!competition) return null;
 
   // Dashboard Screen
   if (view === "dashboard") {
@@ -284,17 +384,21 @@ function App() {
         </nav>
 
         <main className="dashboard-content">
-          <Leaderboard leaderboard={leaderboard} onViewUser={viewUserList} />
+          <Leaderboard
+            leaderboard={leaderboard}
+            competition={competition}
+            loading={leaderboardLoading}
+            error={leaderboardError}
+            onSelectCompetition={selectCompetition}
+            onRetry={() => loadDashboardData(competition)}
+            onViewUser={viewUserList}
+          />
         </main>
 
         <footer className="app-footer">
           <button
             className="logout-btn"
-            onClick={() => {
-              setCurrentUser(null);
-              localStorage.removeItem("wingwatch-user");
-              setView("login");
-            }}
+            onClick={handleLogout}
           >
             Logout
           </button>
@@ -309,7 +413,9 @@ function App() {
       <div className="App my-list">
         <header className="app-header">
           <h1>📝 My List</h1>
-          <p>{userProfile?.birdCount || 0} birds spotted</p>
+          <p>
+            All birds · {userProfile?.birdCount || 0} birds spotted
+          </p>
         </header>
 
         <nav className="bottom-nav">
@@ -331,11 +437,17 @@ function App() {
             setShowDropdown={setShowDropdown}
             onAddBird={addBird}
             loading={loading}
+            competition="worldwide"
           />
           {showDuplicatePopup && (
             <div className="duplicate-popup">
               Nice try, but this bird is already on your list! 🐦
             </div>
+          )}
+          {loading && !userProfile && (
+            <p className="empty-message" role="status">
+              Loading complete bird list…
+            </p>
           )}
           {userProfile && (
             <BirdList
@@ -346,26 +458,27 @@ function App() {
               getBirdUrl={getBirdUrl}
             />
           )}
+          {profileError && (
+            <RequestError
+              onRetry={() =>
+                currentUser &&
+                loadUserProfile(currentUser.username, "worldwide")
+              }
+            />
+          )}
         </main>
 
         <footer className="app-footer">
           <button
             className="backup-btn"
-            onClick={() =>
-              userProfile &&
-              handleDataBackup(userProfile.username, userProfile.birdList)
-            }
-            disabled={!userProfile || userProfile.birdList.length === 0}
+            onClick={() => userProfile && handleDataBackup(userProfile.username)}
+            disabled={!userProfile}
           >
             Data Backup
           </button>
           <button
             className="logout-btn"
-            onClick={() => {
-              setCurrentUser(null);
-              localStorage.removeItem("wingwatch-user");
-              setView("login");
-            }}
+            onClick={handleLogout}
           >
             Logout
           </button>
@@ -383,10 +496,18 @@ function App() {
             ←
           </button>
           <h1>📝 {selectedUser}'s List</h1>
-          <p>{userProfile?.birdCount || 0} birds spotted</p>
+          <p>
+            {competitionLabels[competition]} · {userProfile?.birdCount || 0}{" "}
+            birds spotted
+          </p>
         </header>
 
         <main className="list-content">
+          {loading && !userProfile && (
+            <p className="empty-message" role="status">
+              Loading {competitionLabels[competition]} list…
+            </p>
+          )}
           {userProfile && (
             <BirdList
               birds={userProfile.birdList}
@@ -396,26 +517,24 @@ function App() {
               getBirdUrl={getBirdUrl}
             />
           )}
+          {profileError && (
+            <RequestError
+              onRetry={() => loadUserProfile(selectedUser, competition)}
+            />
+          )}
         </main>
 
         <footer className="app-footer">
           <button
             className="backup-btn"
-            onClick={() =>
-              userProfile &&
-              handleDataBackup(userProfile.username, userProfile.birdList)
-            }
-            disabled={!userProfile || userProfile.birdList.length === 0}
+            onClick={() => userProfile && handleDataBackup(userProfile.username)}
+            disabled={!userProfile}
           >
             Data Backup
           </button>
           <button
             className="logout-btn"
-            onClick={() => {
-              setCurrentUser(null);
-              localStorage.removeItem("wingwatch-user");
-              setView("login");
-            }}
+            onClick={handleLogout}
           >
             Logout
           </button>
@@ -465,16 +584,52 @@ const LoginForm: React.FC<{
 // Leaderboard Component
 const Leaderboard: React.FC<{
   leaderboard: { username: string; birdCount: number }[];
+  competition: Competition;
+  loading: boolean;
+  error: boolean;
+  onSelectCompetition: (competition: Competition) => void;
+  onRetry: () => void;
   onViewUser: (username: string) => void;
-}> = ({ leaderboard, onViewUser }) => {
+}> = ({
+  leaderboard,
+  competition,
+  loading,
+  error,
+  onSelectCompetition,
+  onRetry,
+  onViewUser,
+}) => {
+  const nextCompetition: Competition =
+    competition === "australia" ? "worldwide" : "australia";
+
   const truncateUsername = (username: string) => {
     return username.length > 14 ? username.substring(0, 14) + "..." : username;
   };
 
   return (
     <section className="leaderboard">
-      <h2>🏆 Leaderboard</h2>
-      {leaderboard.length > 0 ? (
+      <div className="leaderboard-header">
+        <div>
+          <h2>🏆 Leaderboard</h2>
+          <p className="competition-name">{competitionLabels[competition]}</p>
+        </div>
+        <button
+          type="button"
+          className="competition-toggle"
+          aria-label={`Switch to ${competitionLabels[nextCompetition]}`}
+          title={`Switch to ${competitionLabels[nextCompetition]}`}
+          onClick={() => onSelectCompetition(nextCompetition)}
+        >
+          <span aria-hidden="true">{competitionIcons[competition]}</span>
+        </button>
+      </div>
+      {loading ? (
+        <p className="empty-message" role="status">
+          Loading {competitionLabels[competition]} leaderboard…
+        </p>
+      ) : error ? (
+        <RequestError onRetry={onRetry} />
+      ) : leaderboard.length > 0 ? (
         <div className="leaderboard-list">
           {leaderboard.map((user, index) => (
             <button
@@ -498,7 +653,15 @@ const Leaderboard: React.FC<{
   );
 };
 
-// Users List Component
+const RequestError: React.FC<{ onRetry: () => void }> = ({ onRetry }) => (
+  <div className="request-error" role="alert">
+    <p>We couldn't load this competition.</p>
+    <button type="button" onClick={onRetry}>
+      Retry
+    </button>
+  </div>
+);
+
 // Add Bird Form Component
 const AddBirdForm: React.FC<{
   selectedBird: Bird | null;
@@ -509,6 +672,7 @@ const AddBirdForm: React.FC<{
   setShowDropdown: (show: boolean) => void;
   onAddBird: () => void;
   loading: boolean;
+  competition: Competition;
 }> = ({
   selectedBird,
   setSelectedBird,
@@ -518,8 +682,9 @@ const AddBirdForm: React.FC<{
   setShowDropdown,
   onAddBird,
   loading,
+  competition,
 }) => {
-  const filteredBirds = searchBirds(searchQuery);
+  const filteredBirds = searchCompetitionBirds(searchQuery, competition);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -576,9 +741,9 @@ const AddBirdForm: React.FC<{
         {showDropdown && searchQuery.trim() && (
           <div className="dropdown">
             {filteredBirds.length > 0 ? (
-              filteredBirds.slice(0, 10).map((bird, index) => (
+              filteredBirds.slice(0, 10).map((bird) => (
                 <div
-                  key={index}
+                  key={bird.scientificName}
                   className="dropdown-item"
                   onClick={() => handleBirdSelect(bird)}
                 >

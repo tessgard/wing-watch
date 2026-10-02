@@ -281,9 +281,46 @@ body {
 
 .leaderboard h2 {
   color: #556b2f;
-  margin-bottom: 1rem;
   font-size: 1.3rem;
-  text-align: center;
+  text-align: left;
+}
+
+.leaderboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.competition-name {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.competition-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.competition-toggle:hover {
+  transform: scale(1.08);
+}
+
+.competition-toggle:focus-visible {
+  outline: 3px solid #9bbf63;
+  border-radius: 50%;
+  outline-offset: 2px;
 }
 
 .leaderboard-list {
@@ -696,6 +733,26 @@ body {
   padding: 2rem;
 }
 
+.request-error {
+  padding: 1rem;
+  border-radius: 8px;
+  background: #fff3f1;
+  color: #8b231a;
+  text-align: center;
+}
+
+.request-error button {
+  margin-top: 0.75rem;
+  padding: 0.6rem 1rem;
+  border: 0;
+  border-radius: 8px;
+  background: #556b2f;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+
 /* Loading States */
 .loading {
   opacity: 0.6;
@@ -724,6 +781,11 @@ body {
   .add-btn {
     width: 100%;
   }
+
+  .leaderboard-header {
+    flex-wrap: wrap;
+  }
+
 }
 
 @media (min-width: 768px) {
