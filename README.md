@@ -14,7 +14,8 @@ A full-stack birding application for bird watchers to track their sightings, com
 
 ### 🐦 Bird Tracking
 
-- **967 Australian bird species** database with scientific names and family classifications
+- Australian bird catalog with scientific names and family classifications
+- New Caledonian bird catalog for the Worldwide competition
 - **Smart search dropdown** with real-time filtering
 - **Duplicate prevention** - no cheating allowed!
 - Add and delete birds from personal lists
@@ -22,7 +23,8 @@ A full-stack birding application for bird watchers to track their sightings, com
 
 ### 🏆 Social Features
 
-- **Leaderboard** with rankings by bird count
+- Australian and Worldwide leaderboards with rankings by eligible bird count
+- Per-user competition choice remembered in the current browser
 - **Crown for the leader** - competitive birding at its finest
 - Browse other users' bird lists
 - See who's the top birder in your area
@@ -123,7 +125,7 @@ npm start
 
 ### Frontend
 
-- **React 18** with TypeScript
+- **React 19** with TypeScript
 - **React Icons** (Lucide and FontAwesome)
 - **Modern CSS** with mobile-first responsive design
 - **Dark olive green theme** (#556B2F)
@@ -134,12 +136,12 @@ npm start
 - **Node.js** with Express framework
 - **TypeScript** for type safety
 - **CORS** enabled for cross-origin requests
-- **In-memory data store** with persistent user sessions
+- **PostgreSQL** persistence through Prisma
 - RESTful API design
 
 ### Data
 
-- **967 Australian bird species** with:
+- Australian bird species plus New Caledonian species not already present in the Australian catalog, with:
   - Common names (e.g., "Rainbow Lorikeet")
   - Scientific names (e.g., "Trichoglossus moluccanus")
   - Family classifications (e.g., "Psittacidae")
@@ -150,7 +152,7 @@ npm start
 
 - `POST /api/login` - User login/registration
 - `GET /api/users` - Get all users
-- `GET /api/users/:username` - Get user profile and bird list
+- `GET /api/users/:username?competition=australia|worldwide` - Get a scoped user profile and bird list (defaults to Australia)
 
 ### Bird Management
 
@@ -159,15 +161,16 @@ npm start
 
 ### Leaderboard
 
-- `GET /api/leaderboard` - Get user rankings by bird count
+- `GET /api/leaderboard?competition=australia|worldwide` - Get scoped user rankings by bird count (defaults to Australia)
 
 ## 📱 How to Use
 
 1. **Login**: Enter your username to create/access your account
-2. **Dashboard**: View leaderboard and browse other users' lists
-3. **Add Birds**: Search from 967 Australian species and add to your list
-4. **My List**: View your personal bird collection with counts
-5. **Compete**: Check the leaderboard to see who's the top birder!
+2. **Choose a competition**: Australia is selected by default; select the dashboard's current-scope icon to toggle between Australian and Worldwide competitions. The choice is remembered for your username in this browser.
+3. **Dashboard**: View the selected competition's leaderboard and browse scoped user lists
+4. **Add Birds**: My List is the complete sighting list and always searches Australian plus New Caledonian species; the active competition only controls leaderboard scoring and competitor views
+5. **My List**: View the sightings and count eligible for the selected competition
+6. **Compete**: Australian sightings count in both competitions; non-Australian sightings count only in Worldwide
 
 ## 🚀 Development
 

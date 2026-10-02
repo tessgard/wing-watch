@@ -2,6 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
 import 'dotenv/config';
+import {
+  Competition,
+  filterBirdsForCompetition,
+  parseCompetitionQuery,
+  projectLeaderboard,
+} from './competition';
 
 // Types
 interface Bird {
@@ -100,18 +106,20 @@ app.get('/api/users', async (req, res) => {
 
 // Get leaderboard
 app.get('/api/leaderboard', async (req, res) => {
+  let competition: Competition;
+
+  try {
+    competition = parseCompetitionQuery(req.query.competition);
+  } catch {
+    return res.status(400).json({ error: 'Unsupported competition' });
+  }
+
   try {
     const users = await prisma.user.findMany({
       include: { birds: true }
     });
 
-    const leaderboard = users
-      .map((user: User) => ({
-        username: user.username,
-        birdCount: user.birds.length
-      }))
-      .sort((a: { username: string; birdCount: number }, b: { username: string; birdCount: number }) => b.birdCount - a.birdCount)
-      .slice(0, 10);
+    const leaderboard = projectLeaderboard(users, competition);
 
     res.json({ leaderboard });
   } catch (error) {
@@ -122,6 +130,14 @@ app.get('/api/leaderboard', async (req, res) => {
 
 // Get user profile
 app.get('/api/users/:username', async (req, res) => {
+  let competition: Competition;
+
+  try {
+    competition = parseCompetitionQuery(req.query.competition);
+  } catch {
+    return res.status(400).json({ error: 'Unsupported competition' });
+  }
+
   try {
     const { username } = req.params;
 
@@ -134,7 +150,8 @@ app.get('/api/users/:username', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const birdList = user.birds.map((bird: Bird) => ({
+    const eligibleBirds = filterBirdsForCompetition(user.birds, competition);
+    const birdList = eligibleBirds.map((bird: Bird) => ({
       id: bird.id,
       name: bird.name,
       dateAdded: bird.dateAdded.toISOString()
@@ -144,7 +161,7 @@ app.get('/api/users/:username', async (req, res) => {
       id: user.id,
       username: user.username,
       birdList,
-      birdCount: user.birds.length
+      birdCount: eligibleBirds.length
     });
   } catch (error) {
     console.error('Get user profile error:', error);

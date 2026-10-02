@@ -10,7 +10,7 @@
     "postinstall": "npx prisma generate",
     "db:migrate": "npx prisma migrate deploy",
     "backup": "ts-node src/backup.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --require ts-node/register --test src/competition.test.ts"
   },
   "keywords": [
     "birding",

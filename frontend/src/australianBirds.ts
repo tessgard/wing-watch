@@ -1,6 +1,6 @@
 // Australian Bird Species Database
 // Extracted from WLAB-Table 1.csv
-// Contains 967 species
+// Contains 970 species
 
 export interface Bird {
   commonName: string;
@@ -1335,6 +1335,11 @@ export const australianBirds: Bird[] = [
     family: "Bristlebirds",
   },
   {
+    commonName: "Eastern Cattle-Egret",
+    scientificName: "Ardea coromanda",
+    family: '"Herons',
+  },
+  {
     commonName: "Eastern Grass Owl",
     scientificName: "Tyto longimembris",
     family: "Masked Owls",
@@ -2358,6 +2363,11 @@ export const australianBirds: Bird[] = [
     commonName: "Little Grebe",
     scientificName: "Tachybaptus ruficollis",
     family: "Grebes",
+  },
+  {
+    commonName: "Little Heron",
+    scientificName: "Butorides atricapilla",
+    family: '"Herons',
   },
   {
     commonName: "Little Kingfisher",
@@ -3927,6 +3937,11 @@ export const australianBirds: Bird[] = [
   {
     commonName: "Spotted Bowerbird",
     scientificName: "Chlamydera maculata",
+    family: "Bowerbirds and Catbirds",
+  },
+  {
+    commonName: "Spotted Catbird",
+    scientificName: "Ailuroedus maculosus",
     family: "Bowerbirds and Catbirds",
   },
   {
